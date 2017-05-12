@@ -1,0 +1,46 @@
+/* Base Application Styles */
+html, body {
+  color: #fff;
+  background-color: #222;
+
+  width: 100%;
+  height: 100%;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+}
+
+/* stage -- start */
+.stage {
+  position: relative;
+  width: 100%;
+  height: 680px;
+}
+/* stage -- start */
+
+/* img -- start */
+.img-sec {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  background-color: #ddd;
+}
+/* img -- end */
+
+/* controll start */
+.controll-nav {
+  position: absolute;
+  left: 0;
+  bottom: 30px;
+  z-index: 101;
+
+  width: 100%;
+
+  text-align: center;
+}
+/* ocntroll end */

@@ -1,2 +1,2 @@
 # gallery_react
-A prictise of React, Webpack v2, sass and ES6
+A prictise of React, Webpack, sass and ES6
