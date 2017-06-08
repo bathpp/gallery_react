@@ -7,15 +7,19 @@ import ReactDOM from 'react-dom';
 // url loader, return MD5 hash of the file content
 // let yeomanImage = require('../images/yeoman.png');
 let imageData = require('../data/imageData.json');
-// get img path, self executed function
-imageData = ((imageJsonData)=>{
-  for (var i = 0, j = imageJsonData.length; i < j; i++) {
-    let singleImageData = imageJsonData[i];
-    singleImageData.imageURL = require('../images/' + singleImageData.fileName);
-    imageJsonData[i] = singleImageData;
-  }
-  return imageJsonData;
-})(imageData);
+// json object can use map?
+imageData = imageData.map((item) => {
+  item.imageURL = require('../images/' + item.fileName);
+  return item;
+})
+// imageData = ((imageJsonData)=>{
+//   for (let i = 0, j = imageJsonData.length; i < j; i++) {
+//     let singleImageData = imageJsonData[i];
+//     singleImageData.imageURL = require('../images/' + singleImageData.fileName);
+//     imageJsonData[i] = singleImageData;
+//   }
+//   return imageJsonData;
+// })(imageData);
 
 // get random number between low and high
 let getRangeRandom = (low, high) => Math.floor(Math.random() * (high - low) + low);
@@ -32,7 +36,12 @@ class ImgFigure extends React.Component {
    * handle click on img to inverse
    */
   handleClick(e) {
-    this.props.inverse();
+    if (this.props.arrange.isCenter){
+      this.props.inverse();
+    }
+    else {
+      this.props.center();
+    }
     e.stopPropagation();
     e.preventDefault();
   }
@@ -46,15 +55,18 @@ class ImgFigure extends React.Component {
 
     // add rotation to imgFigure
     if (this.props.arrange.rotate) {
-      (['Moz', 'ms', 'Webkit', '']).map((value) => {
-          styleObj[value + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
+      (['Moz', 'ms', 'Webkit', '']).map((item) => {
+          styleObj[item + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
       })
     }
 
     // add is-inverse in className
     let imgFigureClassName = 'img-figure';
         imgFigureClassName += this.props.arrange.isInverse ? ' is-inverse': '';
-
+    // make center pic on top
+    if (this.props.arrange.isCenter) {
+      styleObj['zIndex'] = 11;
+    }
     return(
       <figure className = {imgFigureClassName} style={styleObj} onClick={this.handleClick}>
         <img src={this.props.data.imageURL}
@@ -71,6 +83,19 @@ class ImgFigure extends React.Component {
           </div>
         </figcaption>
       </figure>
+    );
+  }
+}
+
+class ControllerUnit extends React.Component {
+  handleClick(e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  render() {
+    return (
+      <span className="controller-unit" onClick={this.handleClick}></span>
     );
   }
 }
@@ -114,19 +139,19 @@ class GalleryByReactApp extends React.Component {
   // get pic position after mount
   componentDidMount() {
     // get stage size
-    let stageDOM = ReactDOM.findDOMNode(this.refs.gallaryStage),
-        stageW = stageDOM.scrollWidth,
-        stageH = stageDOM.scrollHeight,
-        halfStageW = Math.ceil(stageW / 2),
-        halfStageH = Math.ceil(stageH / 2);
+    const stageDOM = ReactDOM.findDOMNode(this.refs.gallaryStage),
+          stageW = stageDOM.scrollWidth,
+          stageH = stageDOM.scrollHeight,
+          halfStageW = Math.ceil(stageW / 2),
+          halfStageH = Math.ceil(stageH / 2);
 
 
     // get imgFigure size
-    let imgFigureDOM = ReactDOM.findDOMNode(this.refs.imgFigure0),
-        imgW = imgFigureDOM.scrollWidth,
-        imgH = imgFigureDOM.scrollHeight,
-        halfImgW = Math.ceil(imgW / 2),
-        halfImgH = Math.ceil(imgH / 2);
+    const imgFigureDOM = ReactDOM.findDOMNode(this.refs.imgFigure0),
+          imgW = imgFigureDOM.scrollWidth,
+          imgH = imgFigureDOM.scrollHeight,
+          halfImgW = Math.ceil(imgW / 2),
+          halfImgH = Math.ceil(imgH / 2);
 
         //get the position of the center pic
         this.Constant.centerPos = {
@@ -159,17 +184,27 @@ class GalleryByReactApp extends React.Component {
   /*
    * inverse pic
    * @param index
-   * @return {function}
+   * @return closure, index is taken when called
    */
   inverse (index) {
-    return ()=>{
-      let imgArrangeArr = this.state.imgArrangeArr;
+    return () => {
+      const imgArrangeArr = this.state.imgArrangeArr;
 
       imgArrangeArr[index].isInverse = !imgArrangeArr[index].isInverse;
 
       this.setState(
         {imgArrangeArr: imgArrangeArr}
       )
+    }
+  }
+
+  /*
+   * @param index
+   * @return closure, index is taken when called
+   */
+  center (index) {
+    return () => {
+      this.rearrange(index)
     }
   }
   /*
@@ -209,7 +244,8 @@ class GalleryByReactApp extends React.Component {
           top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1]),
           left: getRangeRandom(vPosRangeX[0], vPosRangeX[1])
         },
-        rotate: get30DegRandom()
+        rotate: get30DegRandom(),
+        isCenter: false
       };
     });
 
@@ -228,7 +264,8 @@ class GalleryByReactApp extends React.Component {
           top: getRangeRandom(hPosRangeY[0], hPosRangeY[1]),
           left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1])
         },
-        rotate: get30DegRandom()
+        rotate: get30DegRandom(),
+        isCenter: false
       };
     }
 
@@ -270,10 +307,18 @@ class GalleryByReactApp extends React.Component {
                    data={value}
                    ref={'imgFigure'+index}
                    arrange={this.state.imgArrangeArr[index]}
-                   inverse={this.inverse(index)}>
-        </ImgFigure>
+                   inverse={this.inverse(index)}
+                   center={this.center(index)}
+        ></ImgFigure>
       )
+
+      controllerUnits.push (
+        <ControllerUnit/>
+      )
+
     });
+
+
 
     return (
       <section className="stage" ref="gallaryStage">
