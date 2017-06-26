@@ -333,11 +333,15 @@ class GalleryByReactApp extends React.Component {
                    arrange={this.state.imgArrangeArr[index]}
                    inverse={this.inverse(index)}
                    center={this.center(index)}
-        ></ImgFigure>
+        />
       )
 
       controllerUnits.push (
-        <ControllerUnit arrange={this.state.imgArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>
+        <ControllerUnit key={index}
+                        arrange={this.state.imgArrangeArr[index]}
+                        inverse={this.inverse(index)}
+                        center={this.center(index)}
+        />
       )
 
     });
