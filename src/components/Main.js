@@ -88,14 +88,38 @@ class ImgFigure extends React.Component {
 }
 
 class ControllerUnit extends React.Component {
+  // Use this
+  // constructor(props) {
+  //   super(props);
+  //   this.handleClick = this.handleClick.bind(this);
+  // }
+  // or this to bind onclick
+  // onClick={this.handleClick.bind(this)}
+
   handleClick(e) {
+    // handle unit click
+    if(this.props.arrange.isCenter) {
+      this.props.inverse();
+    }
+    else {
+      this.props.center();
+    }
     e.stopPropagation();
     e.preventDefault();
   }
 
   render() {
+    let controllerUnitClassName = 'controller-unit';
+    // modify className according to image's state
+    if(this.props.arrange.isCenter){
+      controllerUnitClassName += ' is-center';
+
+      if (this.props.arrange.isInverse){
+        controllerUnitClassName += ' is-inverse';
+      }
+    }
     return (
-      <span className="controller-unit" onClick={this.handleClick}></span>
+      <span className={controllerUnitClassName} onClick={this.handleClick.bind(this)}></span>
     );
   }
 }
@@ -313,7 +337,7 @@ class GalleryByReactApp extends React.Component {
       )
 
       controllerUnits.push (
-        <ControllerUnit/>
+        <ControllerUnit arrange={this.state.imgArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>
       )
 
     });
